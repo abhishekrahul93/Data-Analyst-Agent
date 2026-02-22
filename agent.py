@@ -3,7 +3,7 @@ import pandas as pd
 from langchain_openai import ChatOpenAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] =  "YOUR_KEY_HERE"
 
 def clean_data(df):
     df = df.drop_duplicates()
