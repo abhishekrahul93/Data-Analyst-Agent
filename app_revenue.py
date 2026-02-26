@@ -430,11 +430,30 @@ with tab3:
         display = ch_attr[["channel","spend","leads","activated","act_rate","roas","cpl","cpa","spend_share"]].copy()
         display.columns = ["Channel","Spend (€)","Leads","Activated","Act. Rate %","ROAS","CPL (€)","CPA (€)","Spend Share %"]
         display = display.round(2)
+        # Colour-code ROAS column manually (no matplotlib needed)
+        def highlight_roas(val):
+            try:
+                v = float(str(val).replace("×",""))
+                if v >= 4:   return "background-color: #065f46; color: white"
+                elif v >= 2.5: return "background-color: #78350f; color: white"
+                else:        return "background-color: #7f1d1d; color: white"
+            except: return ""
+        def highlight_cpa(val):
+            try:
+                v = float(str(val).replace("€","").replace("N/A","999"))
+                if v <= 10:  return "background-color: #065f46; color: white"
+                elif v <= 40: return "background-color: #78350f; color: white"
+                else:        return "background-color: #7f1d1d; color: white"
+            except: return ""
+        display_fmt = display.copy()
+        display_fmt["Spend (€)"]    = display_fmt["Spend (€)"].apply(lambda x: f"€{x:,.0f}" if x else "€0")
+        display_fmt["ROAS"]         = display_fmt["ROAS"].apply(lambda x: f"{x:.2f}×" if x else "N/A")
+        display_fmt["Act. Rate %"]  = display_fmt["Act. Rate %"].apply(lambda x: f"{x:.1f}%" if x else "-")
+        display_fmt["Spend Share %"]= display_fmt["Spend Share %"].apply(lambda x: f"{x:.1f}%" if x else "-")
         st.dataframe(
-            display.style
-                .background_gradient(subset=["ROAS"], cmap="RdYlGn")
-                .background_gradient(subset=["CPA (€)"], cmap="RdYlGn_r")
-                .format({"Spend (€)": "€{:,.0f}", "ROAS": "{:.2f}×", "Act. Rate %": "{:.1f}%", "Spend Share %": "{:.1f}%"}),
+            display_fmt.style
+                .applymap(highlight_roas, subset=["ROAS"])
+                .applymap(highlight_cpa,  subset=["CPA (€)"]),
             use_container_width=True
         )
 
